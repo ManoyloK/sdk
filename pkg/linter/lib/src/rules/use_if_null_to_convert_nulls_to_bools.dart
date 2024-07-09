@@ -22,6 +22,10 @@ if (nullableBool == true) {
 }
 if (nullableBool != false) {
 }
+if (true == nullableBool) {
+}
+if (false != nullableBool) {
+}
 ```
 
 **GOOD:**
@@ -71,19 +75,29 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitBinaryExpression(BinaryExpression node) {
-    var type = node.leftOperand.staticType;
+    var left = node.leftOperand;
     var right = node.rightOperand;
-    if (node.operator.type == TokenType.EQ_EQ &&
-        isNullableBool(type) &&
-        right is BooleanLiteral &&
-        right.value) {
-      rule.reportLint(node);
-    }
-    if (node.operator.type == TokenType.BANG_EQ &&
-        isNullableBool(type) &&
-        right is BooleanLiteral &&
-        !right.value) {
+    var operator = node.operator.type;
+
+    if ((operator == TokenType.EQ_EQ &&
+            _isViolateLintRule(
+                left: left, right: right, expectedValue: true)) ||
+        (operator == TokenType.BANG_EQ &&
+            _isViolateLintRule(
+                left: left, right: right, expectedValue: false))) {
       rule.reportLint(node);
     }
   }
+
+  bool _isViolateLintRule({
+    required Expression left,
+    required Expression right,
+    required bool expectedValue,
+  }) =>
+      (isNullableBool(left.staticType) &&
+          right is BooleanLiteral &&
+          right.value == expectedValue) ||
+      (isNullableBool(right.staticType) &&
+          left is BooleanLiteral &&
+          left.value == expectedValue);
 }

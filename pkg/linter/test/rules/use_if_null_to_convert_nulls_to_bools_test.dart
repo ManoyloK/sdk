@@ -31,12 +31,26 @@ bool r = e == true;
 ''', [
       lint(18, 9),
     ]);
+
+    await assertDiagnostics(r'''
+bool? e;
+bool r = true == e;
+''', [
+      lint(18, 9),
+    ]);
   }
 
   test_notEqual_false() async {
     await assertDiagnostics(r'''
 bool? e;
 bool r = e != false;
+''', [
+      lint(18, 10),
+    ]);
+
+    await assertDiagnostics(r'''
+bool? e;
+bool r = false != e;
 ''', [
       lint(18, 10),
     ]);
